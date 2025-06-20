@@ -40,119 +40,128 @@ struct ProgressView: View {
         appData.markedCountsPerMonth(forYear: selectedYear)
     }
     
+    var milestones: [YearMilestone] {
+        ProgressLogic.generateMilestones(progress: yearlyProgress)
+    }
+
+    var monthAchievements: [MonthAchievement] {
+        ProgressLogic.generateMonthAchievements(markedDays: appData.markedDaysInCurrentYear(), year: selectedYear)
+    }
+
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 30) {
                 
                 // Günlük hedef
-                VStack(alignment: .leading) {
-                    Text("Günlük Hedef")
-                        .font(.headline)
-                    
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 12)
-                            
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .leading, endPoint: .trailing))
-                                .frame(width: CGFloat(dailyProgress) * geo.size.width, height: 12)
-                                .animation(.easeInOut, value: dailyProgress)
-                        }
-                    }
-                    .frame(height: 12)
-                    .padding(.top, 4)
-                    
-                    Text("\(Int(dailyProgress * 100))% tamamlandı")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                .padding()
-                
-                Divider()
+//                VStack(alignment: .leading) {
+//                    Text("Günlük Hedef")
+//                        .font(.headline)
+//                    
+//                    GeometryReader { geo in
+//                        ZStack(alignment: .leading) {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(Color.gray.opacity(0.2))
+//                                .frame(height: 12)
+//                            
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(LinearGradient(colors: [.blue, .cyan], startPoint: .leading, endPoint: .trailing))
+//                                .frame(width: CGFloat(dailyProgress) * geo.size.width, height: 12)
+//                                .animation(.easeInOut, value: dailyProgress)
+//                        }
+//                    }
+//                    .frame(height: 12)
+//                    .padding(.top, 4)
+//                    
+//                    Text("\(Int(dailyProgress * 100))% tamamlandı")
+//                        .font(.caption)
+//                        .foregroundColor(.gray)
+//                }
+//                .padding()
+//                
+//                Divider()
                 
                 // Alışkanlıklar
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Alışkanlıklar")
-                            .font(.headline)
-                        Spacer()
-                        Button(action: {
-                            showAddHabit = true
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                        }
-                    }
-                    
-                    if habits.isEmpty {
-                        Text("Henüz alışkanlık eklenmedi.")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                    
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
-                        ForEach(habits) { habit in
-                            Button(action: {
-                                if let index = habits.firstIndex(where: { $0.id == habit.id }) {
-                                    habits[index].isCompleted.toggle()
-                                }
-                            }) {
-                                VStack(spacing: 8) {
-                                    Text(habit.emoji)
-                                        .font(.largeTitle)
-                                    Text(habit.name)
-                                        .font(.caption)
-                                        .multilineTextAlignment(.center)
-                                        .foregroundColor(.primary)
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 80)
-                                .padding()
-                                .background(habit.isCompleted ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(habit.isCompleted ? Color.green : Color.gray.opacity(0.3), lineWidth: 1)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .contextMenu {
-                                Button("Düzenle") {
-                                    habitToEdit = habit
-                                }
-                                Button("Sil", role: .destructive) {
-                                    habits.removeAll { $0.id == habit.id }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                Divider()
-                
+//                VStack(alignment: .leading, spacing: 12) {
+//                    HStack {
+//                        Text("Alışkanlıklar")
+//                            .font(.headline)
+//                        Spacer()
+//                        Button(action: {
+//                            showAddHabit = true
+//                        }) {
+//                            Image(systemName: "plus.circle.fill")
+//                                .font(.title2)
+//                        }
+//                    }
+//                    
+//                    if habits.isEmpty {
+//                        Text("Henüz alışkanlık eklenmedi.")
+//                            .foregroundColor(.gray)
+//                            .italic()
+//                    }
+//                    
+//                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
+//                        ForEach(habits) { habit in
+//                            Button(action: {
+//                                if let index = habits.firstIndex(where: { $0.id == habit.id }) {
+//                                    habits[index].isCompleted.toggle()
+//                                }
+//                            }) {
+//                                VStack(spacing: 8) {
+//                                    Text(habit.emoji)
+//                                        .font(.largeTitle)
+//                                    Text(habit.name)
+//                                        .font(.caption)
+//                                        .multilineTextAlignment(.center)
+//                                        .foregroundColor(.primary)
+//                                }
+//                                .frame(maxWidth: .infinity, minHeight: 80)
+//                                .padding()
+//                                .background(habit.isCompleted ? Color.green.opacity(0.2) : Color.gray.opacity(0.1))
+//                                .cornerRadius(12)
+//                                .overlay(
+//                                    RoundedRectangle(cornerRadius: 12)
+//                                        .stroke(habit.isCompleted ? Color.green : Color.gray.opacity(0.3), lineWidth: 1)
+//                                )
+//                            }
+//                            .buttonStyle(.plain)
+//                            .contextMenu {
+//                                Button("Düzenle") {
+//                                    habitToEdit = habit
+//                                }
+//                                Button("Sil", role: .destructive) {
+//                                    habits.removeAll { $0.id == habit.id }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                
+//                Divider()
+//                
                 // Başarılar
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Başarılar")
-                        .font(.headline)
-                    
-                    if dailyProgress == 1.0 {
-                        AchievementBadge(title: "Günü Tamamladın 🎉", color: .green)
-                    } else if dailyProgress >= 0.75 {
-                        AchievementBadge(title: "Harika Gidiyorsun 💪", color: .blue)
-                    } else if dailyProgress >= 0.5 {
-                        AchievementBadge(title: "Yarısını Geçtin 🌓", color: .orange)
-                    } else if dailyProgress >= 0.25 {
-                        AchievementBadge(title: "Başlangıç Yapıldı 🚀", color: .yellow)
-                    } else {
-                        Text("Henüz başarı yok.")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                }
-                
-                Divider()
-                
+//                VStack(alignment: .leading, spacing: 12) {
+//                    Text("Başarılar")
+//                        .font(.headline)
+//                    
+//                    if dailyProgress == 1.0 {
+//                        AchievementBadge(title: "Günü Tamamladın 🎉", color: .green)
+//                    } else if dailyProgress >= 0.75 {
+//                        AchievementBadge(title: "Harika Gidiyorsun 💪", color: .blue)
+//                    } else if dailyProgress >= 0.5 {
+//                        AchievementBadge(title: "Yarısını Geçtin 🌓", color: .orange)
+//                    } else if dailyProgress >= 0.25 {
+//                        AchievementBadge(title: "Başlangıç Yapıldı 🚀", color: .yellow)
+//                    } else {
+//                        Text("Henüz başarı yok.")
+//                            .font(.caption)
+//                            .foregroundColor(.gray)
+//                    }
+//                }
+//                
+//                Divider()
+//                
                 // Yıl seçimi butonu + aylık ilerleme grafiği
                 VStack(alignment: .leading) {
                     Text("Yıl Seçimi")
@@ -254,6 +263,23 @@ struct ProgressView: View {
                 }
                 
                 Spacer(minLength: 30)
+                Divider()
+
+                // Başarı Rozetleri
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Başarılar")
+                        .font(.headline)
+
+                    ForEach(milestones) { milestone in
+                        AchievementBadge(title: milestone.label, desc: milestone.desc, icon: milestone.icon, achieved: milestone.achieved)
+                            }
+
+                    ForEach(monthAchievements) { achievement in
+                        AchievementBadge(title: achievement.label, desc: achievement.desc, icon: achievement.icon, achieved: achievement.achieved)
+                            
+                    }
+                }
+
             }
             .padding()
         }
@@ -388,20 +414,35 @@ struct WeekProgress: Identifiable {
 
 struct AchievementBadge: View {
     let title: String
-    let color: Color
+    let desc: String
+    let icon: String
+    let achieved: Bool
 
     var body: some View {
-        HStack {
-            Image(systemName: "star.fill")
-                .foregroundColor(color)
-            Text(title)
-                .font(.subheadline)
+        HStack(alignment: .top, spacing: 12) {
+            Text(icon)
+                .font(.largeTitle)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline)
+                    .bold()
+                Text(desc)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
         }
-        .padding(10)
-        .background(color.opacity(0.1))
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(achieved ? Color.green.opacity(0.15) : Color.gray.opacity(0.1))
         .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(achieved ? Color.green : Color.gray.opacity(0.3), lineWidth: 1)
+        )
     }
 }
+
 
 struct ProgressDetailView: View {
     let title: String

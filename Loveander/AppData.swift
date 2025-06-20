@@ -2,18 +2,19 @@ import SwiftUI
 import Combine
 
 // Tarihin sadece yıl-ay-gün kısmını alır, zamanı sıfırlar.
-extension Date {
-    func strippedTime() -> Date {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: self)
-        return calendar.date(from: components)!
-    }
-}
+//extension Date {
+//    func strippedTime() -> Date {
+//        let calendar = Calendar.current
+//        let components = calendar.dateComponents([.year, .month, .day], from: self)
+//        return calendar.date(from: components)!
+//    }
+//}
 
 class AppData: ObservableObject {
     // Tam tarih (yıl, ay, gün, zaman sıfırlı) ve emoji eşleşmesi
     @Published private(set) var markedDays: [Date: String] = [:]
-
+    @Published var monthlyNotes: [String: String] = [:] // "2025-06" gibi anahtarlarla
+    private let notesKey = "monthlyNotes"
     private let saveKey = "markedDays"
     private var calendar: Calendar {
         var cal = Calendar.current
@@ -23,8 +24,27 @@ class AppData: ObservableObject {
 
     init() {
         loadMarkedDays()
+        loadMonthlyNotes()
     }
 
+    func saveNote(for monthKey: String, note: String) {
+        monthlyNotes[monthKey] = note
+        saveMonthlyNotes()
+    }
+
+    func getNote(for monthKey: String) -> String {
+        return monthlyNotes[monthKey] ?? ""
+    }
+
+    private func saveMonthlyNotes() {
+        UserDefaults.standard.set(monthlyNotes, forKey: notesKey)
+    }
+
+    private func loadMonthlyNotes() {
+        if let saved = UserDefaults.standard.dictionary(forKey: notesKey) as? [String: String] {
+            monthlyNotes = saved
+        }
+    }
     // MARK: - Public Methods
 
     func addMark(for date: Date, emoji: String) {

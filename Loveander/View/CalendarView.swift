@@ -40,6 +40,8 @@ struct CalendarView: View {
     @State private var selectedEmoji: String? = nil
     @State private var showEmojiPickerForDate: IdentifiableDate? = nil
     
+    @State private var noteText: String = ""
+    @FocusState private var isNoteFocused: Bool
     // Yeni: Ay-Yıl Picker için state
     @State private var showMonthYearPicker = false
     
@@ -101,6 +103,34 @@ struct CalendarView: View {
             }
             .padding(.horizontal)
             
+            VStack(alignment: .leading, spacing: 12) {
+                            Text("Bu Ayın Notu")
+                                .font(.headline)
+
+                            TextField("Not ekleyin...", text: $noteText)
+                                .focused($isNoteFocused)
+                                .textInputAutocapitalization(.sentences)
+                                .disableAutocorrection(false)
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
+
+                            Button(action: {
+                                let key = monthKey(from: currentDate)
+                                appData.saveNote(for: key, note: noteText)
+                                isNoteFocused = false
+                            }) {
+                                Text("Kaydet")
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .padding()
+            
             Spacer()
         }
         .sheet(item: $showEmojiPickerForDate) { identifiableDate in
@@ -109,11 +139,20 @@ struct CalendarView: View {
                 showEmojiPickerForDate = nil
             })
         }
-        .onChange(of: selectedEmoji) { _ in
+        .onChange(of: selectedEmoji) {
             selectedEmoji = nil
         }
+        .onChange(of: currentDate) { oldValue, newValue in
+            let key = monthKey(from: newValue)
+            noteText = appData.getNote(for: key)
+        }
+
+                .onAppear {
+                    let key = monthKey(from: currentDate)
+                    noteText = appData.getNote(for: key)
+                }
+
     }
-    
     func monthYearString(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "tr_TR")
@@ -122,17 +161,22 @@ struct CalendarView: View {
     }
     
     func isDateMarked(_ date: Date) -> Bool {
-        appData.markedDays.keys.contains(date.stripTime())
+        appData.markedDays.keys.contains(date.strippedTime())
     }
 
     func emojiForDate(_ date: Date) -> String? {
-        let dateKey = date.stripTime()
+        let dateKey = date.strippedTime()
         return appData.markedDays[dateKey]
     }
 
     func toggleEmoji(for date: Date, emoji: String) {
         appData.toggleMark(for: date, emoji: emoji)
     }
+    func monthKey(from date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM"
+            return formatter.string(from: date)
+        }
 }
 
 struct DayView: View {
@@ -249,10 +293,11 @@ struct MonthYearPickerView: View {
     }
 }
 
+
 // Date extension - sadece tarih kısmını karşılaştırmak için
-extension Date {
-    func stripTime() -> Date {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
-        return Calendar.current.date(from: components)!
-    }
-}
+//extension Date {
+//    func stripTime() -> Date {
+//        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
+//        return Calendar.current.date(from: components)!
+//    }
+//}

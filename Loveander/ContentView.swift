@@ -5,24 +5,24 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
+            //HomeView()
+               // .tabItem {
+                //    Label("Home", systemImage: "house")
+                //}
 
             CalendarView()
                 .tabItem {
-                    Label("Calendar", systemImage: "calendar")
+                    Label("Takvim", systemImage: "calendar")
                 }
 
             ProgressView()
                 .tabItem {
-                    Label("Progress", systemImage: "chart.bar")
+                    Label("Raporlar", systemImage: "chart.bar")
                 }
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label("Ayarlar", systemImage: "gear")
                 }
         }
         .environmentObject(appData)  // Burada inject ediyoruz

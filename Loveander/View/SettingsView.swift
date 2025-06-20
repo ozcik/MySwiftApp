@@ -1,5 +1,13 @@
 import SwiftUI
 
+enum ThemeOption: String, CaseIterable, Codable, Identifiable {
+    case light = "Açık"
+    case dark = "Koyu"
+    case system = "Sistem"
+
+    var id: String { self.rawValue }
+}
+
 struct SettingsView: View {
     @AppStorage("username") private var username: String = "Misafir"
     @AppStorage("notificationsEnabled") private var notificationsEnabled: Bool = true
@@ -8,27 +16,32 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                // 🔹 Kullanıcı Adı
+                // Kullanıcı Adı
                 Section(header: Text("Kullanıcı")) {
                     TextField("Kullanıcı adınız", text: $username)
                         .textInputAutocapitalization(.never)
                 }
 
-                // 🔹 Bildirimler
+                // Bildirimler
                 Section(header: Text("Bildirimler")) {
                     Toggle("Bildirimleri Aç", isOn: $notificationsEnabled)
                 }
 
-                // 🔹 Tema Seçimi
+                // Tema Seçimi
                 Section(header: Text("Tema")) {
-                    Picker("Tema", selection: $selectedTheme) {
-                        ForEach(ThemeOption.allCases, id: \.self) { option in
-                            Text(option.rawValue)
+                    VStack(spacing: 10) {
+                        ForEach(ThemeOption.allCases) { option in
+                            ThemeOptionRow(option: option, isSelected: selectedTheme == option) {
+                                withAnimation {
+                                    selectedTheme = option
+                                }
+                            }
                         }
                     }
+                    .padding(.vertical, 5)
                 }
 
-                // 🔹 Hakkında
+                // Hakkında
                 Section(header: Text("Hakkında")) {
                     HStack {
                         Text("Uygulama Sürümü")
@@ -46,9 +59,27 @@ struct SettingsView: View {
     }
 }
 
-// 🔸 Tema Seçenekleri
-enum ThemeOption: String, CaseIterable, Codable {
-    case light = "Açık"
-    case dark = "Koyu"
-    case system = "Sistem"
+/// 🔹 Seçenek satırı — background ifadesi sadeleştirilmiş haliyle ayrı View
+struct ThemeOptionRow: View {
+    let option: ThemeOption
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        let bg: AnyView = isSelected ?
+            AnyView(
+                LinearGradient(colors: [Color.blue.opacity(0.8), Color.blue],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
+            ) :
+            AnyView(Color.clear)
+
+        return Text(option.rawValue)
+            .fontWeight(isSelected ? .bold : .regular)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(bg)
+            .cornerRadius(10)
+            .foregroundColor(isSelected ? .white : .primary)
+            .onTapGesture(perform: onTap)
+    }
 }
